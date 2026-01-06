@@ -1,0 +1,305 @@
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+
+// DATA TERSIMPAN
+string riwayatPemesan[50];
+string riwayatTujuan[50];
+string riwayatKelas[50];
+int riwayatJumlah[50];
+int riwayatTotal[50];
+int riwayatHargaTiket[50];
+
+string riwayatPenumpang[50][50];
+int riwayatJumlahPenumpang[50];
+
+int indexData = 0;
+
+// =====================================================
+//                 LOAD DATA DARI FILE
+// =====================================================
+void loadData() {
+    ifstream file("data_tiket(RAW).txt");
+    if (!file.is_open()) return;
+
+    file >> indexData;
+
+    for (int i = 0; i < indexData; i++) {
+        file >> riwayatPemesan[i];
+        file >> riwayatTujuan[i];
+        file >> riwayatKelas[i];
+        file >> riwayatHargaTiket[i];
+        file >> riwayatJumlah[i];\
+        file >> riwayatTotal[i];
+        file >> riwayatJumlahPenumpang[i];
+
+        for (int j = 0; j < riwayatJumlahPenumpang[i]; j++) {
+            file >> riwayatPenumpang[i][j];
+        } 
+    }
+
+    file.close();
+}
+
+// =====================================================
+//                 SIMPAN DATA KE FILE
+// =====================================================
+void saveData() {
+
+    // 🔹 SIMPAN RAW UNTUK LOADDATA
+    ofstream raw("data_tiket(RAW).txt");
+
+    raw << indexData << endl;
+    for (int i = 0; i < indexData; i++) {
+
+        raw << riwayatPemesan[i] << endl;
+        raw << riwayatTujuan[i] << endl;
+        raw << riwayatKelas[i] << endl;
+        raw << riwayatHargaTiket[i] << endl;
+        raw << riwayatJumlah[i] << endl;
+        raw << riwayatTotal[i] << endl;
+        raw << riwayatJumlahPenumpang[i] << endl;
+
+        for (int j = 0; j < riwayatJumlahPenumpang[i]; j++) {
+            raw << riwayatPenumpang[i][j] << endl;
+        }
+    }
+    raw.close();
+
+    // 🔹 SIMPAN TAMPILAN RAPIH
+    ofstream rapih("data_tiket.txt");
+
+    rapih << "======= DATA TIKET PENUMPANG =======\n";
+
+    for (int i = 0; i < indexData; i++) {
+
+        rapih << "\n=== Pemesanan ke-" << i + 1 << " ===\n";
+        rapih << "Nama Pemesan    : " << riwayatPemesan[i] << endl;
+        rapih << "Tujuan          : " << riwayatTujuan[i] << endl;
+        rapih << "Kelas           : " << riwayatKelas[i] << endl;
+        rapih << "Harga per Tiket : Rp " << riwayatHargaTiket[i] << endl;
+        rapih << "Jumlah Tiket    : " << riwayatJumlah[i] << endl;
+        rapih << "Total Bayar     : Rp " << riwayatTotal[i] << endl;
+
+        rapih << "\n>> DAFTAR PENUMPANG:\n";
+        rapih << left << setw(10) << "ID" << setw(20) << "Nama Penumpang" << endl;
+        rapih << "------------------------------\n";
+
+        for (int p = 0; p < riwayatJumlahPenumpang[i]; p++) {
+            rapih << left
+                   << setw(10) << ("A" + to_string(p + 1))
+                   << setw(20) << riwayatPenumpang[i][p]
+                   << endl;
+        }
+    }
+
+    rapih.close();
+}
+
+int main() {
+    int harga[3][3] = {
+        {80000, 120000, 180000},
+        {60000, 100000, 150000},
+        {100000, 150000, 220000}
+    };
+    string tujuanNama[3] = {"Jakarta", "Bandung", "Surabaya"};
+	string kelasNama[3]  = {"Ekonomi", "Bisnis", "Eksekutif"};
+
+    // 🍀 LOAD DATA SAAT PROGRAM DIBUKA
+    loadData();
+
+    int menu;
+    do {
+        cout << "\n======= MENU UTAMA =======\n";
+		cout << "1. Pemesanan Tiket\n";
+		cout << "2. Lihat Data Pemesanan\n";
+		cout << "3. Hapus Pemesanan\n";   // ➜ DITAMBAHKAN
+		cout << "4. Keluar\n";
+		cout << "Pilih menu : ";
+		cin >> menu;
+
+
+        if (menu == 1) {
+
+            string pemesan;
+            int tujuan, kelas, jumlah, hargaTiket = 0;
+
+            cout << "\nInput nama pemesan : ";
+            cin >> pemesan;
+
+            // TUJUAN
+            cout << "\n=== MENU TUJUAN ===\n";
+            cout << "1. Jakarta\n2. Bandung\n3. Surabaya\n";
+            cout << "Pilih tujuan : ";
+            cin >> tujuan;
+
+            if (tujuan < 1 || tujuan > 3) {
+                cout << "Pilihan tidak valid!\n";
+                continue;
+            }
+
+            // KELAS
+            cout << "\n=== MENU KELAS ===\n";
+            cout << "1. Ekonomi\n2. Bisnis\n3. Eksekutif\n";
+            cout << "Pilih kelas : ";
+            cin >> kelas;
+
+            if (kelas < 1 || kelas > 3) {
+                cout << "Pilihan tidak valid!\n";
+                continue;
+            }
+
+            // Harga tiket
+            hargaTiket = harga[tujuan - 1][kelas - 1];
+
+            cout << "\nJumlah tiket : ";
+            cin >> jumlah;
+            
+            if (jumlah >= 50) {
+			    cout << "Kapasitas penuh!\n";
+			    continue;
+			}
+
+
+            int total = hargaTiket * jumlah;
+
+            // OUTPUT
+            cout << "\n=== RINCIAN PEMESANAN ===\n";
+            cout << "Nama Pemesan    : " << pemesan << endl;
+            cout << "Tujuan          : " << tujuanNama[tujuan - 1] << endl;
+            cout << "Kelas           : " << kelasNama[kelas - 1] << endl;
+            cout << "Jumlah Tiket    : " << jumlah << endl;
+            cout << "Harga per Tiket : Rp " << hargaTiket << endl;
+            cout << "Total Bayar     : Rp " << total << endl;
+
+            char konfirmasi;
+            cout << "Konfirmasi pembelian? (y/n): ";
+            cin >> konfirmasi;
+
+            if (konfirmasi == 'n' || konfirmasi == 'N') continue;
+
+            // SIMPAN KE ARRAY
+            riwayatPemesan[indexData] = pemesan;
+            riwayatTujuan[indexData]  = tujuanNama[tujuan - 1];
+            riwayatKelas[indexData]   = kelasNama[kelas - 1];
+            riwayatHargaTiket[indexData] = hargaTiket;
+            riwayatJumlah[indexData]  = jumlah;
+            riwayatTotal[indexData]   = total;
+            riwayatJumlahPenumpang[indexData] = jumlah;
+
+            // INPUT PENUMPANG
+            cout << "\n=== INPUT DATA PENUMPANG ===\n";
+            for (int i = 0; i < jumlah; i++) {
+                cout << "Penumpang " << i + 1 << " : ";
+                cin >> riwayatPenumpang[indexData][i];
+            }
+
+            // TABEL PENUMPANG
+            cout << "\n=== DAFTAR PENUMPANG ===\n";
+            cout << left << setw(10) << "ID"
+                 << setw(20) << "Nama Penumpang" << endl;
+            cout << "------------------------------\n";
+
+            for (int i = 0; i < jumlah; i++) {
+                cout << left
+                    << setw(10) << ("A" + to_string(i + 1))
+                    << setw(20) << riwayatPenumpang[indexData][i]
+                    << endl;
+            }
+
+            indexData++;
+
+            // 🍀 SIMPAN DATA KE FILE SETIAP ADA PEMESANAN BARU
+            saveData();
+
+        }
+
+        else if (menu == 2) {
+
+            cout << "\n======= DATA TIKET PENUMPANG =======\n";
+
+            if (indexData == 0) cout << "Belum ada data pemesanan.\n";
+            else {
+                for (int i = 0; i < indexData; i++) {
+
+                    cout << "\n=== Pemesanan ke-" << i + 1 << " ===\n";
+                    cout << "Nama Pemesan   : " << riwayatPemesan[i] << endl;
+                    cout << "Tujuan         : " << riwayatTujuan[i] << endl;
+                    cout << "Kelas          : " << riwayatKelas[i] << endl;
+                    cout << "Harga per Tiket: Rp " << riwayatHargaTiket[i] << endl;
+                    cout << "Jumlah Tiket   : " << riwayatJumlah[i] << endl;
+                    cout << "Total Bayar    : Rp " << riwayatTotal[i] << endl;
+
+                    cout << "\n>> DAFTAR PENUMPANG:\n";
+                    cout << left << setw(10) << "ID"
+                         << setw(20) << "Nama Penumpang" << endl;
+                    cout << "------------------------------\n";
+
+                    for (int p = 0; p < riwayatJumlahPenumpang[i]; p++) {
+                        cout << left
+                             << setw(10) << ("A" + to_string(p + 1))
+                             << setw(20) << riwayatPenumpang[i][p]
+                             << endl;
+                    }
+                }
+            }
+        }
+
+        else if (menu == 3) {
+
+		    if (indexData == 0) {
+		        cout << "\nBelum ada data yang bisa dihapus!\n";
+		        continue;
+		    }
+		
+		    cout << "\n======= HAPUS PEMESANAN =======\n";
+		
+		    // Tampilkan daftar pemesanan singkat
+		    for (int i = 0; i < indexData; i++) {
+		        cout << i + 1 << ". " << riwayatPemesan[i]
+		             << " (" << riwayatTujuan[i] << ", "
+		             << riwayatKelas[i] << ")\n";
+		    }
+		
+		    int hapus;
+		    cout << "\nMasukkan nomor pemesanan yang ingin dihapus: ";
+		    cin >> hapus;
+		
+		    if (hapus < 1 || hapus > indexData) {
+		        cout << "Nomor tidak valid!\n";
+		        continue;
+		    }
+		
+		    hapus--;  // ubah ke index array (0-based)
+		
+		    // Geser data ke atas
+		    for (int i = hapus; i < indexData - 1; i++) {
+		        riwayatPemesan[i] = riwayatPemesan[i + 1];
+		        riwayatTujuan[i]  = riwayatTujuan[i + 1];
+		        riwayatKelas[i]   = riwayatKelas[i + 1];
+		        riwayatJumlah[i]  = riwayatJumlah[i + 1];
+		        riwayatTotal[i]   = riwayatTotal[i + 1];
+		        riwayatJumlahPenumpang[i] = riwayatJumlahPenumpang[i + 1];
+		
+		        // Geser daftar penumpang
+		        for (int j = 0; j < riwayatJumlahPenumpang[i]; j++) {
+		            riwayatPenumpang[i][j] = riwayatPenumpang[i + 1][j];
+		        }
+		    }
+		
+		    indexData--;  // jumlah data berkurang
+		
+		    saveData();   // Simpan setelah penghapusan
+		
+		    cout << "\nData pemesanan berhasil dihapus!\n";
+		}
+		
+		else if (menu == 4) {
+		    cout << "\nTerima kasih telah menggunakan program ini!\n";
+		}
+
+    } while (menu != 4);
+
+    return 0;
+}
